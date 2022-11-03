@@ -3,6 +3,7 @@ package com.example.groupfive;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
@@ -18,6 +19,12 @@ public class AppController implements Initializable {
     public Label welcomeText;
     @FXML
     private Label songLabel;
+    @FXML
+    private ProgressBar progressBar;
+
+    private Timer timer;
+
+    private TimerTask timerTask;
 
     private Media media;
     private MediaPlayer mediaPlayer;
@@ -28,6 +35,8 @@ public class AppController implements Initializable {
     private ArrayList<File> songs;
 
     private int songNumber;
+
+    private boolean running;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -47,11 +56,13 @@ public class AppController implements Initializable {
 
         songLabel.setText(songs.get(songNumber).getName());
         mediaPlayer.play();
+        beginTimer();
     }
 
 
     @FXML
     protected void playMusic() {
+        beginTimer();
         mediaPlayer.play();
     }
     @FXML
@@ -60,6 +71,7 @@ public class AppController implements Initializable {
     }
     @FXML
     protected void resetMusic() {
+        progressBar.setProgress(0);
         mediaPlayer.seek(Duration.seconds(0));
     }
 
@@ -67,10 +79,15 @@ public class AppController implements Initializable {
     protected void nextSong() {
         if(songNumber < songs.size() - 1){
             songNumber++;
+            if (running) {
+                cancelTimer();
+            }
 
         }else{
             songNumber = 0;
-
+            if (running) {
+                cancelTimer();
+            }
         }
         mediaPlayer.stop();
         media = new Media(songs.get(songNumber).toURI().toString());
@@ -93,5 +110,32 @@ public class AppController implements Initializable {
         mediaPlayer = new MediaPlayer(media);
         songLabel.setText(songs.get(songNumber).getName());
         mediaPlayer.play();
+    }
+
+    public void beginTimer(){
+        timer = new Timer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+
+                running = true;
+                double current = mediaPlayer.getCurrentTime().toSeconds();
+                double end = media.getDuration().toSeconds();
+                System.out.println(current/end);
+                progressBar.setProgress(current/end);
+
+                if(current/end == 1){
+                    cancelTimer();
+                }
+
+            }
+        };
+
+        timer.scheduleAtFixedRate(timerTask, 1000, 1000);
+    }
+
+    public void cancelTimer(){
+        running = false;
+        timer.cancel();
     }
 }
