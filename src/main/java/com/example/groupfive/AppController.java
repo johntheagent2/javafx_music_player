@@ -1,11 +1,14 @@
 package com.example.groupfive;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -37,12 +40,14 @@ public class AppController implements Initializable {
     private int songNumber;
 
     private boolean running;
+    private String tempDirect = "src/main/java/com/example/groupfive/music";
+    private String direct;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         songs = new ArrayList<File>();
 
-        directory = new File("src/main/java/com/example/groupfive/music");
+        directory = new File(tempDirect);
 
         files = directory.listFiles();
         if(files != null){
@@ -53,7 +58,6 @@ public class AppController implements Initializable {
 
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
-
         songLabel.setText(songs.get(songNumber).getName());
         mediaPlayer.play();
         beginTimer();
@@ -68,6 +72,7 @@ public class AppController implements Initializable {
     @FXML
     protected void pauseMusic() {
         mediaPlayer.pause();
+        cancelTimer();
     }
     @FXML
     protected void resetMusic() {
@@ -79,16 +84,14 @@ public class AppController implements Initializable {
     protected void nextSong() {
         if(songNumber < songs.size() - 1){
             songNumber++;
-            if (running) {
-                cancelTimer();
-            }
 
         }else{
             songNumber = 0;
-            if (running) {
-                cancelTimer();
-            }
         }
+        if (running) {
+            cancelTimer();
+        }
+        beginTimer();
         mediaPlayer.stop();
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
@@ -137,5 +140,23 @@ public class AppController implements Initializable {
     public void cancelTimer(){
         running = false;
         timer.cancel();
+    }
+
+    public void chooseFolder() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File("src"));
+
+        Stage stagePrimary = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stagePrimary);
+
+        songs.clear();
+        directory = new File(selectedDirectory.getAbsolutePath());
+
+        files = directory.listFiles();
+        if(files != null){
+            for(File file : files){
+                songs.add(file);
+            }
+        }
     }
 }

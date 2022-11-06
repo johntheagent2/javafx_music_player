@@ -18,12 +18,13 @@
 
     <ProgressBar fx:id="progressBar" maxWidth="Infinity" progress="0.0"/>
 
-    <HBox>
+    <HBox spacing="5.0">
         <Button text="Play" onAction="#playMusic"/>
         <Button text="Pause" onAction="#pauseMusic"/>
         <Button text="Reset" onAction="#resetMusic"/>
         <Button text="Next Song" onAction="#nextSong"/>
         <Button text="Previous Song" onAction="#previousSong"/>
+        <Button text="Chose Folder" onAction="#chooseFolder"/>
     </HBox>
 
 </VBox>
