@@ -1,10 +1,13 @@
 package com.example.groupfive;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
@@ -13,17 +16,24 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.sql.*;
+import java.util.*;
 
 public class AppController implements Initializable {
     public Label welcomeText;
     @FXML
     private Label songLabel;
+
+    @FXML
+    private Label timeProgress;
     @FXML
     private ProgressBar progressBar;
+
+    @FXML
+    private Slider volumeController;
+
+
+    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost?useSSL=false", "root", "");
 
     private Timer timer;
 
@@ -43,6 +53,9 @@ public class AppController implements Initializable {
     private String tempDirect = "src/main/java/com/example/groupfive/music";
     private String direct;
 
+    public AppController() throws SQLException {
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         songs = new ArrayList<File>();
@@ -51,14 +64,19 @@ public class AppController implements Initializable {
 
         files = directory.listFiles();
         if(files != null){
-            for(File file : files){
-                songs.add(file);
-            }
+            Collections.addAll(songs, files);
         }
 
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
         songLabel.setText(songs.get(songNumber).getName());
+
+        volumeController.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                mediaPlayer.setVolume(volumeController.getValue() * 0.01);
+            }
+        });
     }
 
 
@@ -122,7 +140,7 @@ public class AppController implements Initializable {
                 running = true;
                 double current = mediaPlayer.getCurrentTime().toSeconds();
                 double end = media.getDuration().toSeconds();
-                System.out.println(current/end);
+                String time = String.valueOf(current);
                 progressBar.setProgress(current/end);
 
                 if(current/end == 1){
@@ -140,7 +158,7 @@ public class AppController implements Initializable {
         timer.cancel();
     }
 
-    public void chooseFolder() {
+    public void chooseFolder() throws SQLException {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("src"));
 
@@ -152,9 +170,24 @@ public class AppController implements Initializable {
 
         files = directory.listFiles();
         if(files != null){
-            for(File file : files){
-                songs.add(file);
-            }
+            Collections.addAll(songs, files);
+
+
+            System.out.println("Connected");
+
+            Statement stm = conn.createStatement();
+            stm.execute("USE MUSICLIST");
+            String sql = "INSERT INTO MUSIC(NAME) VALUES(?)";
+            for(int i = 0; i < songs.size(); i++){
+                PreparedStatement pstm = conn.prepareStatement(sql);
+                pstm.setString(1, songs.get(i).getName());
+                System.out.println(i + " " + songs.get(i).getName());
+                pstm.execute();
+            }conn.close();
         }
+
+        media = new Media(songs.get(songNumber).toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+        songLabel.setText(songs.get(songNumber).getName());
     }
 }

@@ -1,15 +1,25 @@
 package com.example.groupfive;
 
 public class Music {
+    public int songNumber;
     public String name;
     public double duration;
 
     public Music() {
     }
 
-    public Music(String name, double duration) {
+    public Music(int songNumber, String name, double duration) {
+        this.songNumber = songNumber;
         this.name = name;
         this.duration = duration;
+    }
+
+    public int getSongNumber() {
+        return songNumber;
+    }
+
+    public void setSongNumber(int songNumber) {
+        this.songNumber = songNumber;
     }
 
     public String getName() {
@@ -31,7 +41,8 @@ public class Music {
     @Override
     public String toString() {
         return "Music{" +
-                "name='" + name + '\'' +
+                "songNumber=" + songNumber +
+                ", name='" + name + '\'' +
                 ", duration=" + duration +
                 '}';
     }
