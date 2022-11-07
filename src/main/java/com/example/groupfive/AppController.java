@@ -4,7 +4,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
@@ -15,12 +20,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
 
 public class AppController implements Initializable {
     public Label welcomeText;
+    public Button createPlaylist;
     @FXML
     private Label songLabel;
 
@@ -52,6 +59,8 @@ public class AppController implements Initializable {
     private boolean running;
     private String tempDirect = "src/main/java/com/example/groupfive/music";
     private String direct;
+    Stage stage;
+    Scene scene;
 
     public AppController() throws SQLException {
     }
@@ -189,5 +198,15 @@ public class AppController implements Initializable {
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
         songLabel.setText(songs.get(songNumber).getName());
+    }
+
+    public void createPlaylist(ActionEvent actionEvent) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("createPlaylist.fxml")));
+
+        stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setTitle("Create Playlist!");
+        stage.setScene(scene);
+        stage.show();
     }
 }

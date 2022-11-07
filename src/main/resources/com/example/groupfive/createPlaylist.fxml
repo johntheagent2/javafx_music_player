@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.groupfive.CreatePlaylistController">
+   <children>
+      <ListView fx:id="myListView" layoutX="19.0" layoutY="100.0" prefHeight="200.0" prefWidth="565.0" />
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutY="4.0" prefHeight="83.0" prefWidth="600.0" text="Create Playlist">
+         <font>
+            <Font size="28.0" />
+         </font>
+      </Label>
+      <Button fx:id="backButton" layoutX="19.0" layoutY="346.0" mnemonicParsing="false" onAction="#backButton" text="Back" />
+      <Button fx:id="createPlaylistButton" layoutX="74.0" layoutY="346.0" mnemonicParsing="false" onAction="#creatPlaylistButton" text="Create Playlist" />
+      <TextField fx:id="playlistNaming" layoutX="153.0" layoutY="308.0" />
+      <Label layoutX="19.0" layoutY="312.0" text="Name of the playlist:" />
+   </children>
+</AnchorPane>
