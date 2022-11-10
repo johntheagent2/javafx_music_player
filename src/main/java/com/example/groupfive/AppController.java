@@ -165,7 +165,7 @@ public class AppController implements Initializable {
         timer.cancel();
     }
 
-    public void chooseFolder() throws SQLException, IOException {
+    public void importMusic() throws SQLException, IOException {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("src"));
 
@@ -175,7 +175,7 @@ public class AppController implements Initializable {
         conn = new DatabaseController();
 
         songs.clear();
-        if(selectedDirectory == null){
+        if(selectedDirectory != null){
             directory = new File(selectedDirectory.getAbsolutePath());
         }
         files = directory.listFiles();
@@ -183,14 +183,15 @@ public class AppController implements Initializable {
         for (File i : files) {
             System.out.println(i.getPath());
             File dest = new File("src\\main\\java\\com\\example\\groupfive\\music" + "\\" + i.getName());
-            Files.copy(Path.of(i.getPath()), dest.toPath());
+            if(!dest.exists()){
+                Files.copy(Path.of(i.getPath()), dest.toPath());
+            }
         }
 
         if (files != null) {
             Collections.addAll(songs, files);
             System.out.println("Connected");
-
-            conn.addItemToDatabase(songs);
+            conn.addItemToDatabase(songs, "music");
 
         }
         runningMedia();

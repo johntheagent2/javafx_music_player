@@ -1,6 +1,9 @@
 package com.example.groupfive;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -9,12 +12,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -32,6 +38,8 @@ public class CreatePlaylistController implements Initializable {
 
     private DatabaseController conn;
 
+    private ArrayList<String> songs;
+
     public CreatePlaylistController() throws SQLException {
     }
 
@@ -43,6 +51,21 @@ public class CreatePlaylistController implements Initializable {
 
             while(rs.next()){
                 myListView.getItems().add(rs.getInt(1) + " " + rs.getString(2));
+                myListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+
+                myListView.setOnMouseClicked(new EventHandler<Event>() {
+
+                    @Override
+                    public void handle(Event event) {
+                        ObservableList<String> selectedItems =  myListView.getSelectionModel().getSelectedItems();
+
+                        for(String s : selectedItems){
+                            System.out.println(s);
+                        }
+
+                    }
+                });
             }
         } catch (SQLException e) {
             System.out.println("Error!");
