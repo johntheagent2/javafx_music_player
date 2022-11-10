@@ -22,6 +22,8 @@ import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 
@@ -38,10 +40,6 @@ public class AppController implements Initializable {
 
     @FXML
     private Slider volumeController;
-
-
-    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost?useSSL=false", "root", "");
-
     private Timer timer;
 
     private TimerTask timerTask;
@@ -58,7 +56,7 @@ public class AppController implements Initializable {
 
     private boolean running;
     private String tempDirect = "src/main/java/com/example/groupfive/music";
-    private String direct;
+    private DatabaseController conn;
     Stage stage;
     Scene scene;
 
@@ -72,22 +70,22 @@ public class AppController implements Initializable {
         directory = new File(tempDirect);
 
         files = directory.listFiles();
-        if(files != null){
+        if(files == null){
             Collections.addAll(songs, files);
+            runningMedia();
         }
+        setVolumeController();
+    }
 
+    public void runningMedia(){
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
         songLabel.setText(songs.get(songNumber).getName());
-
-        volumeController.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                mediaPlayer.setVolume(volumeController.getValue() * 0.01);
-            }
-        });
     }
 
+    public void setVolumeController(){
+        volumeController.valueProperty().addListener((observableValue, number, t1) -> mediaPlayer.setVolume(volumeController.getValue() * 0.01));
+    }
 
     @FXML
     protected void playMusic() {
@@ -167,37 +165,35 @@ public class AppController implements Initializable {
         timer.cancel();
     }
 
-    public void chooseFolder() throws SQLException {
+    public void chooseFolder() throws SQLException, IOException {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("src"));
 
         Stage stagePrimary = new Stage();
         File selectedDirectory = directoryChooser.showDialog(stagePrimary);
 
+        conn = new DatabaseController();
+
         songs.clear();
-        directory = new File(selectedDirectory.getAbsolutePath());
-
+        if(selectedDirectory == null){
+            directory = new File(selectedDirectory.getAbsolutePath());
+        }
         files = directory.listFiles();
-        if(files != null){
-            Collections.addAll(songs, files);
 
-
-            System.out.println("Connected");
-
-            Statement stm = conn.createStatement();
-            stm.execute("USE MUSICLIST");
-            String sql = "INSERT INTO MUSIC(NAME) VALUES(?)";
-            for(int i = 0; i < songs.size(); i++){
-                PreparedStatement pstm = conn.prepareStatement(sql);
-                pstm.setString(1, songs.get(i).getName());
-                System.out.println(i + " " + songs.get(i).getName());
-                pstm.execute();
-            }conn.close();
+        for (File i : files) {
+            System.out.println(i.getPath());
+            File dest = new File("src\\main\\java\\com\\example\\groupfive\\music" + "\\" + i.getName());
+            Files.copy(Path.of(i.getPath()), dest.toPath());
         }
 
-        media = new Media(songs.get(songNumber).toURI().toString());
-        mediaPlayer = new MediaPlayer(media);
-        songLabel.setText(songs.get(songNumber).getName());
+        if (files != null) {
+            Collections.addAll(songs, files);
+            System.out.println("Connected");
+
+            conn.addItemToDatabase(songs);
+
+        }
+        runningMedia();
     }
 
     public void createPlaylist(ActionEvent actionEvent) throws IOException {

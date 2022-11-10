@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class CreatePlaylistController implements Initializable {
 
-    private Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/musiclist", "root", "");
     @FXML
     private ListView<String> myListView;
 
@@ -30,15 +30,16 @@ public class CreatePlaylistController implements Initializable {
     @FXML
     private TextField playlistNaming;
 
+    private DatabaseController conn;
+
     public CreatePlaylistController() throws SQLException {
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        String sql = "SELECT * FROM `music`";
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            ResultSet rs = pstm.executeQuery();
+            conn = new DatabaseController();
+            ResultSet rs = conn.getTable("music");
 
             while(rs.next()){
                 myListView.getItems().add(rs.getInt(1) + " " + rs.getString(2));
@@ -50,23 +51,18 @@ public class CreatePlaylistController implements Initializable {
     }
 
     public void backButton(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("AppController.fxml"));
-        stage.setTitle("Hello!");
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main.fxml")));
+
         stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
         scene = new Scene(root);
+        stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
     }
 
     public void creatPlaylistButton() throws SQLException {
         String playlistName = playlistNaming.getText().replace(" ", "_");
-
-        Statement stmt = conn.createStatement();
-        String sql = "CREATE TABLE " +
-                playlistName +
-                " (ID INT PRIMARY KEY AUTO_INCREMENT , " +
-                " NAME VARCHAR(255))";
-        stmt.execute(sql);
-        System.out.println("Created table in given database...");
+        conn.createTable(playlistName);
+        System.out.println("Created " + playlistName +" table in database...");
     }
 }
