@@ -13,10 +13,10 @@ public class DatabaseController {
     }
 
     public void createTable(String tableName) throws SQLException {
-        String sql = "CREATE TABLE " +
+        String sql = "CREATE TABLE IF NOT EXISTS " +
                 tableName +
                 " (ID INT PRIMARY KEY AUTO_INCREMENT , " +
-                " NAME VARCHAR(255))";
+                " NAME VARCHAR(255) NOT NULL UNIQUE)";
         stmt.execute(sql);
     }
 
@@ -26,8 +26,8 @@ public class DatabaseController {
         return pstm.executeQuery();
     }
 
-    public void addItemToDatabase(ArrayList<File> songs) throws SQLException {
-        String sql = "INSERT INTO MUSIC(NAME) VALUES(?)";
+    public void addItemToDatabase(ArrayList<File> songs, String tableName) throws SQLException {
+        String sql = "INSERT IGNORE INTO "+tableName+"(NAME) VALUES(?)";
         for(int i = 0; i < songs.size(); i++){
             PreparedStatement pstm = conn.prepareStatement(sql);
             pstm.setString(1, songs.get(i).getName());

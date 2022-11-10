@@ -70,17 +70,18 @@ public class AppController implements Initializable {
         directory = new File(tempDirect);
 
         files = directory.listFiles();
-        if(files == null){
+        if(files != null){
             Collections.addAll(songs, files);
-            runningMedia();
+
         }
+        runningMedia();
         setVolumeController();
     }
 
     public void runningMedia(){
-        media = new Media(songs.get(songNumber).toURI().toString());
-        mediaPlayer = new MediaPlayer(media);
-        songLabel.setText(songs.get(songNumber).getName());
+            media = new Media(songs.get(songNumber).toURI().toString());
+            mediaPlayer = new MediaPlayer(media);
+            songLabel.setText(songs.get(songNumber).getName());
     }
 
     public void setVolumeController(){
@@ -165,7 +166,7 @@ public class AppController implements Initializable {
         timer.cancel();
     }
 
-    public void chooseFolder() throws SQLException, IOException {
+    public void importMusic() throws SQLException, IOException {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("src"));
 
@@ -175,7 +176,8 @@ public class AppController implements Initializable {
         conn = new DatabaseController();
 
         songs.clear();
-        if(selectedDirectory == null){
+
+        if(selectedDirectory != null){
             directory = new File(selectedDirectory.getAbsolutePath());
         }
         files = directory.listFiles();
@@ -183,15 +185,19 @@ public class AppController implements Initializable {
         for (File i : files) {
             System.out.println(i.getPath());
             File dest = new File("src\\main\\java\\com\\example\\groupfive\\music" + "\\" + i.getName());
-            Files.copy(Path.of(i.getPath()), dest.toPath());
+            if(!dest.exists() && i.getName().endsWith((".mp3"))){
+                Files.copy(Path.of(i.getPath()), dest.toPath());
+            }
         }
 
         if (files != null) {
-            Collections.addAll(songs, files);
             System.out.println("Connected");
-
-            conn.addItemToDatabase(songs);
-
+            for(File i : files){
+                if(i.getName().endsWith((".mp3"))){
+                    songs.add(i);
+                }
+            }
+            conn.addItemToDatabase(songs, "music");
         }
         runningMedia();
     }
