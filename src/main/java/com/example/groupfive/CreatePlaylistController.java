@@ -53,7 +53,6 @@ public class CreatePlaylistController implements Initializable {
             conn = new DatabaseController();
             ResultSet rs = conn.getTable("music");
             List<String> list = new ArrayList<>();
-            Button button = new Button("Get");
             while(rs.next()){
                 myListView.getItems().add(rs.getInt(1) + " " + rs.getString(2));
                 myListView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
@@ -70,12 +69,6 @@ public class CreatePlaylistController implements Initializable {
                         return observable;
                     }
                 }));
-
-                button.setOnAction(e -> {
-                    for (int i = 0; i < list.size(); i++) {
-                        System.out.println(list.get(i));
-                    }
-                });
             }
         } catch (SQLException e) {
             System.out.println("Error!");
@@ -97,5 +90,9 @@ public class CreatePlaylistController implements Initializable {
         String playlistName = playlistNaming.getText().replace(" ", "_");
         conn.createTable(playlistName);
         System.out.println("Created " + playlistName +" table in database...");
+        ResultSet rs = conn.getAllTableName();
+        while(rs.next()){
+            System.out.println(rs.getString(1));
+        }
     }
 }

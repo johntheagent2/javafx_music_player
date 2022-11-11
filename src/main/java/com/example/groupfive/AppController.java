@@ -1,5 +1,7 @@
 package com.example.groupfive;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -9,14 +11,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import java.util.*;
 public class AppController implements Initializable {
     public Label welcomeText;
     public Button createPlaylist;
+    public ListView songListView;
     @FXML
     private Label songLabel;
 
@@ -51,7 +53,6 @@ public class AppController implements Initializable {
     private File[] files;
 
     private ArrayList<File> songs;
-
     private int songNumber;
 
     private boolean running;
@@ -65,23 +66,58 @@ public class AppController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        songs = new ArrayList<File>();
+        showPlaylist();
 
-        directory = new File(tempDirect);
-
-        files = directory.listFiles();
-        if(files != null){
-            Collections.addAll(songs, files);
-
-        }
         runningMedia();
         setVolumeController();
     }
 
+    public void showPlaylist(){
+        try {
+            conn = new DatabaseController();
+            ResultSet rs = conn.getAllTableName();
+            List<String> list = new ArrayList<>();
+            while(rs.next()){
+                list.add(rs.getString(1));
+            }
+            songListView.getItems().addAll(list);
+            songListView.getSelectionModel().selectedItemProperty().addListener((observableValue, o, t1) -> {
+                System.out.println(songListView.getSelectionModel().getSelectedItem());
+                try {
+                    chosenPlaylist((String) songListView.getSelectionModel().getSelectedItem());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (SQLException e) {
+            System.out.println("Error!");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ResultSet chosenPlaylist(String playlistName) throws SQLException {
+        conn = new DatabaseController();
+        ResultSet rs = conn.getTable(playlistName);
+        while(rs.next()){
+            System.out.println(rs.getString(2));
+        }
+        return rs;
+    }
+
     public void runningMedia(){
-            media = new Media(songs.get(songNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+        songs = new ArrayList<File>();
+
+        directory = new File(tempDirect);
+        files = directory.listFiles();
+
+        if(files != null){
+            Collections.addAll(songs, files);
+        }
+
+        media = new Media(songs.get(songNumber).toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+
+        songLabel.setText(songs.get(songNumber).getName());
     }
 
     public void setVolumeController(){

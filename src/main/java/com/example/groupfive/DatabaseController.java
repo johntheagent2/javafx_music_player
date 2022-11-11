@@ -26,6 +26,12 @@ public class DatabaseController {
         return pstm.executeQuery();
     }
 
+    public ResultSet getAllTableName() throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("Show tables");
+        return rs;
+    }
+
     public void addItemToDatabase(ArrayList<File> songs, String tableName) throws SQLException {
         String sql = "INSERT IGNORE INTO "+tableName+"(NAME) VALUES(?)";
         for(int i = 0; i < songs.size(); i++){

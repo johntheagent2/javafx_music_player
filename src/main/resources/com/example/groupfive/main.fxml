@@ -12,6 +12,7 @@
    <children>
    
        <Label fx:id="welcomeText" text="This is JavaFX Music Player" />
+      <ListView fx:id="songListView" prefHeight="227.0" prefWidth="628.0" />
        <Label fx:id="songLabel" />
    
        <ProgressBar fx:id="progressBar" maxWidth="Infinity" progress="0.0" />
