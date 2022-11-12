@@ -33,11 +33,21 @@ public class DatabaseController {
     }
 
     public void addItemToDatabase(ArrayList<File> songs, String tableName) throws SQLException {
-        String sql = "INSERT IGNORE INTO "+tableName+"(NAME) VALUES(?)";
+        String sql = "INSERT INTO "+tableName+"(NAME) VALUES(?)";
         for(int i = 0; i < songs.size(); i++){
             PreparedStatement pstm = conn.prepareStatement(sql);
             pstm.setString(1, songs.get(i).getName());
-            System.out.println(i + " " + songs.get(i).getName());
+            System.out.println(i + " " + songs.get(i).getName() + " added to database!");
+            pstm.execute();
+        }conn.close();
+    }
+
+    public void addSongsToDatabase(ArrayList<String> songs, String tableName) throws SQLException {
+        String sql = "INSERT INTO "+tableName+"(NAME) VALUES(?)";
+        for(int i = 0; i < songs.size(); i++){
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm.setString(1, songs.get(i));
+            System.out.println(i + " " + songs.get(i) + " added to database!");
             pstm.execute();
         }conn.close();
     }

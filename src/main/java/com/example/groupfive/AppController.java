@@ -1,9 +1,5 @@
 package com.example.groupfive;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,12 +8,10 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -60,6 +54,7 @@ public class AppController implements Initializable {
     private DatabaseController conn;
     Stage stage;
     Scene scene;
+    ResultSet savedChosenPlaylist;
 
     public AppController() throws SQLException {
     }
@@ -67,8 +62,6 @@ public class AppController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         showPlaylist();
-
-        runningMedia();
         setVolumeController();
     }
 
@@ -82,9 +75,9 @@ public class AppController implements Initializable {
             }
             songListView.getItems().addAll(list);
             songListView.getSelectionModel().selectedItemProperty().addListener((observableValue, o, t1) -> {
-                System.out.println(songListView.getSelectionModel().getSelectedItem());
                 try {
-                    chosenPlaylist((String) songListView.getSelectionModel().getSelectedItem());
+                    savedChosenPlaylist = chosenPlaylist((String) songListView.getSelectionModel().getSelectedItem());
+                    runningMedia();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -98,25 +91,36 @@ public class AppController implements Initializable {
     public ResultSet chosenPlaylist(String playlistName) throws SQLException {
         conn = new DatabaseController();
         ResultSet rs = conn.getTable(playlistName);
-        while(rs.next()){
-            System.out.println(rs.getString(2));
-        }
         return rs;
     }
 
-    public void runningMedia(){
-        songs = new ArrayList<File>();
+    public void runningMedia() throws SQLException {
+        songs = new ArrayList<>();
 
         directory = new File(tempDirect);
         files = directory.listFiles();
 
+        ArrayList<String> songsName = new ArrayList<>();
+
+        if(savedChosenPlaylist != null){
+            while(savedChosenPlaylist.next()){
+                songsName.add(savedChosenPlaylist.getString(2));
+            }
+        }
+
         if(files != null){
-            Collections.addAll(songs, files);
+            for(File i : files){
+                for(String j : songsName){
+                    if (i.getName().equals(j)){
+                        songs.add(i);
+                        System.out.println(i.getName() + " " +j);
+                    }
+                }
+            }
         }
 
         media = new Media(songs.get(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
-
         songLabel.setText(songs.get(songNumber).getName());
     }
 
@@ -211,31 +215,29 @@ public class AppController implements Initializable {
 
         conn = new DatabaseController();
 
-        songs.clear();
+//        songs.clear();
 
         if(selectedDirectory != null){
             directory = new File(selectedDirectory.getAbsolutePath());
         }
         files = directory.listFiles();
 
+        ArrayList<File> importSongs = new ArrayList<>();
+
         for (File i : files) {
             System.out.println(i.getPath());
             File dest = new File("src\\main\\java\\com\\example\\groupfive\\music" + "\\" + i.getName());
             if(!dest.exists() && i.getName().endsWith((".mp3"))){
                 Files.copy(Path.of(i.getPath()), dest.toPath());
+                importSongs.add(new File(i.getName()));
+                System.out.println(importSongs);
             }
         }
 
         if (files != null) {
             System.out.println("Connected");
-            for(File i : files){
-                if(i.getName().endsWith((".mp3"))){
-                    songs.add(i);
-                }
-            }
-            conn.addItemToDatabase(songs, "music");
+            conn.addItemToDatabase(importSongs, "music");
         }
-        runningMedia();
     }
 
     public void createPlaylist(ActionEvent actionEvent) throws IOException {

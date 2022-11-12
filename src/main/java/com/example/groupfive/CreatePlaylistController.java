@@ -52,18 +52,19 @@ public class CreatePlaylistController implements Initializable {
         try {
             conn = new DatabaseController();
             ResultSet rs = conn.getTable("music");
-            List<String> list = new ArrayList<>();
+            songs = new ArrayList<>();
             while(rs.next()){
-                myListView.getItems().add(rs.getInt(1) + " " + rs.getString(2));
+                myListView.getItems().add(rs.getString(2));
                 myListView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
                     @Override
                     public ObservableValue<Boolean> call(String item) {
                         BooleanProperty observable = new SimpleBooleanProperty();
                         observable.addListener((obs, wasSelected, isNowSelected) -> {
                             if (isNowSelected) {
-                                list.add(item);
+                                songs.add(item);
+                                System.out.println(item);
                             } else {
-                                list.remove(item);
+                                songs.remove(item);
                             }
                         });
                         return observable;
@@ -89,10 +90,7 @@ public class CreatePlaylistController implements Initializable {
     public void creatPlaylistButton() throws SQLException {
         String playlistName = playlistNaming.getText().replace(" ", "_");
         conn.createTable(playlistName);
+        conn.addSongsToDatabase(songs, playlistName);
         System.out.println("Created " + playlistName +" table in database...");
-        ResultSet rs = conn.getAllTableName();
-        while(rs.next()){
-            System.out.println(rs.getString(1));
-        }
     }
 }
