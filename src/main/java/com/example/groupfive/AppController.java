@@ -1,5 +1,8 @@
 package com.example.groupfive;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,10 +11,12 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -26,6 +31,7 @@ public class AppController implements Initializable {
     public Label welcomeText;
     public Button createPlaylist;
     public ListView songListView;
+    public ListView songView;
     @FXML
     private Label songLabel;
 
@@ -76,12 +82,28 @@ public class AppController implements Initializable {
             songListView.getItems().addAll(list);
             songListView.getSelectionModel().selectedItemProperty().addListener((observableValue, o, t1) -> {
                 try {
+                    songView.getItems().clear();
                     savedChosenPlaylist = chosenPlaylist((String) songListView.getSelectionModel().getSelectedItem());
+                    showSongFromPlaylist((String) songListView.getSelectionModel().getSelectedItem());
                     runningMedia();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             });
+        } catch (SQLException e) {
+            System.out.println("Error!");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void showSongFromPlaylist(String savedChosenPlaylistToShow){
+        try {
+            conn = new DatabaseController();
+            ResultSet rs = conn.getTable(savedChosenPlaylistToShow);
+            songs = new ArrayList<>();
+            while(rs.next()){
+                songView.getItems().add(rs.getString(2));
+            }
         } catch (SQLException e) {
             System.out.println("Error!");
             throw new RuntimeException(e);
