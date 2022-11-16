@@ -52,5 +52,14 @@ public class DatabaseController {
         }conn.close();
     }
 
+    public void deleteContentFromTable(String playlist, ArrayList<String> songs) throws SQLException {
+        for(String i : songs){
+            String sql="DELETE FROM "+ playlist + " WHERE NAME = '"+i+"'";
+            System.out.println(sql);
+            PreparedStatement something = conn.prepareStatement(sql);
+            something.execute();
+        }
+    }
+
 
 }
