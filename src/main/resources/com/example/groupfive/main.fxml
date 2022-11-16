@@ -29,6 +29,7 @@
               <Button onAction="#resetMusic" text="Reset" />
               <Button onAction="#nextSong" text="Next Song" />
               <Button onAction="#previousSong" text="Previous Song" />
+              <Button onAction="#editPlaylist" text="Edit Playlist" />
             <Button fx:id="createPlaylist" onAction="#createPlaylist" text="Create Playlist" />
               <Button onAction="#importMusic" text="Import Music" />
             <Slider fx:id="volumeController" max="100.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="14.0" prefWidth="121.0" value="10.0" />

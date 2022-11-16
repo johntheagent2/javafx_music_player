@@ -58,8 +58,8 @@ public class AppController implements Initializable {
     private boolean running;
     private String tempDirect = "src/main/java/com/example/groupfive/music";
     private DatabaseController conn;
-    Stage stage;
-    Scene scene;
+    private Stage stage;
+    private Scene scene;
     ResultSet savedChosenPlaylist;
 
     public AppController() throws SQLException {
@@ -260,6 +260,16 @@ public class AppController implements Initializable {
             System.out.println("Connected");
             conn.addItemToDatabase(importSongs, "music");
         }
+    }
+
+    public void editPlaylist(ActionEvent actionEvent) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("editPlaylist.fxml")));
+
+        stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setTitle("Create Playlist!");
+        stage.setScene(scene);
+        stage.show();
     }
 
     public void createPlaylist(ActionEvent actionEvent) throws IOException {
